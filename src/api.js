@@ -1,7 +1,7 @@
 // src/api.js
 import axios from 'axios'; // ✅ Import axios only once
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'https://komsyte-backend.onrender.com';
 
 const API = axios.create({
   baseURL: API_URL,
@@ -15,5 +15,6 @@ API.interceptors.request.use((req) => {
   }
   return req;
 });
+
 
 export default API;

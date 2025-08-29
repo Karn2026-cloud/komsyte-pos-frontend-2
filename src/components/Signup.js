@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 // --- API Abstraction ---
 // Separating the API call makes the component cleaner.
 const signupUser = async (userData) => {
-  const response = await fetch("http://localhost:5000/api/signup", {
+  const response = await fetch("https://komsyte-backend.onrender.com/api/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
@@ -186,5 +186,6 @@ const styles = {
     textDecoration: "none",
   },
 };
+
 
 export default Signup;

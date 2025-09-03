@@ -1,25 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-
-// --- API Abstraction ---
-// It's better to keep API calls separate from your components.
-const loginUser = async (credentials) => {
-  const response = await fetch("http://localhost:5000/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    // Throw an error with the message from the backend
-    throw new Error(data.error || "An unknown error occurred.");
-  }
-
-  // The login endpoint only returns a token, so we just return that.
-  return data;
-};
+import API from '../api'; // ✅ Import the new centralized API client
 
 // --- Component ---
 function Login({ onAuthChange }) {
@@ -39,20 +20,16 @@ function Login({ onAuthChange }) {
     setLoading(true);
 
     try {
-      const { token } = await loginUser(formData);
+      // ✅ Use the clean API.post method
+      const response = await API.post("/api/login", formData);
+      const { token } = response.data;
 
-      // 1. Save only the token from the login response.
       localStorage.setItem("token", token);
-
-      // 2. Notify the parent component that authentication state has changed.
       if (onAuthChange) onAuthChange();
-
-      // 3. Redirect to the main page. The app should then fetch user
-      //    profile info using the newly stored token.
       navigate("/");
     } catch (err) {
-      // The error message now comes directly from the API service
-      setError(err.message || "Network error. Please check your connection.");
+      // ✅ Better error handling from Axios
+      setError(err.response?.data?.error || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -60,43 +37,22 @@ function Login({ onAuthChange }) {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Login</h2>
+      <h2 style={styles.title}>Shop Login</h2>
       <form onSubmit={handleLogin}>
+        {/* Input fields remain the same */}
         <div style={styles.inputGroup}>
-          <label htmlFor="email" style={styles.label}>Email Address</label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            autoComplete="username"
-            style={styles.input}
-          />
+            <label htmlFor="email" style={styles.label}>Email</label>
+            <input id="email" name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required style={styles.input} />
         </div>
         <div style={styles.inputGroup}>
-          <label htmlFor="password" style={styles.label}>Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            autoComplete="current-password"
-            style={styles.input}
-          />
+            <label htmlFor="password" style={styles.label}>Password</label>
+            <input id="password" name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={styles.input} />
         </div>
-        <button type="submit" disabled={loading} style={styles.button(loading)}>
+        <button type="submit" disabled={loading} style={styles.button}>
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
-
       {error && <p style={styles.errorText}>{error}</p>}
-
       <p style={styles.footerText}>
         Don’t have an account?{" "}
         <Link to="/signup" style={styles.link}>
@@ -108,7 +64,6 @@ function Login({ onAuthChange }) {
 }
 
 // --- Styles ---
-// Centralizing styles makes the JSX cleaner and easier to manage.
 const styles = {
   container: {
     maxWidth: 400,
@@ -126,7 +81,7 @@ const styles = {
   inputGroup: {
     marginBottom: 12,
   },
-  label: { // Added for accessibility
+   label: {
     position: 'absolute',
     width: 1,
     height: 1,
@@ -140,32 +95,34 @@ const styles = {
   input: {
     width: "100%",
     padding: 10,
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    borderRadius: 4,
+    border: '1px solid #ccc'
   },
-  button: (loading) => ({
+  button: {
     width: "100%",
     padding: 12,
-    backgroundColor: loading ? "#6c757d" : "#007bff",
+    background: "#007bff",
     color: "white",
-    fontSize: 16,
     border: "none",
     borderRadius: 4,
-    cursor: loading ? "not-allowed" : "pointer",
-  }),
+    cursor: "pointer",
+    fontSize: 16,
+  },
   errorText: {
     color: "red",
-    marginTop: 10,
-    fontWeight: "bold",
     textAlign: "center",
+    marginTop: 10,
   },
   footerText: {
-    marginTop: 15,
     textAlign: "center",
+    marginTop: 15,
   },
   link: {
     color: "#007bff",
     textDecoration: "none",
   },
 };
+
 
 export default Login;

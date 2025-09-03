@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from '../api'; // ✅ Import the new centralized API client
+import API from '../api'; // ✅ IMPORT THE CENTRAL API CLIENT
 
-// --- Component ---
 function Signup({ onAuthChange }) {
-  const [formData, setFormData] = useState({
-    shopName: "",
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ shopName: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,28 +17,24 @@ function Signup({ onAuthChange }) {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // ✅ Use the clean API.post method
+      // ✅ USE THE API CLIENT, NOT FETCH
       const response = await API.post("/api/signup", formData);
-      const { token } = response.data;
-      
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", response.data.token);
       if (onAuthChange) onAuthChange();
       navigate("/");
     } catch (err) {
-      // ✅ Better error handling from Axios
-      setError(err.response?.data?.error || "Network error. Please try again.");
+      setError(err.response?.data?.error || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
+  // ... (keep your entire return and styles section exactly as it was)
+   return (
     <div style={styles.container}>
         <h2 style={styles.title}>Create Your Shop</h2>
         <form onSubmit={handleSignup}>
-            {/* Input fields remain the same */}
             <div style={styles.inputGroup}>
                 <label htmlFor="shopName" style={styles.label}>Shop Name</label>
                 <input id="shopName" name="shopName" placeholder="Shop Name" value={formData.shopName} onChange={handleChange} required style={styles.input} />
@@ -70,6 +61,7 @@ function Signup({ onAuthChange }) {
     </div>
   );
 }
+
 
 // --- Styles ---
 const styles = {
@@ -133,3 +125,4 @@ const styles = {
 };
 
 export default Signup;
+

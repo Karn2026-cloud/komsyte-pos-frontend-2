@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from '../api'; // ✅ Import the new centralized API client
+import API from '../api'; // ✅ IMPORT THE CENTRAL API CLIENT
 
-// --- Component ---
 function Login({ onAuthChange }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -18,28 +17,24 @@ function Login({ onAuthChange }) {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // ✅ Use the clean API.post method
+      // ✅ USE THE API CLIENT, NOT FETCH
       const response = await API.post("/api/login", formData);
-      const { token } = response.data;
-
-      localStorage.setItem("token", token);
+      localStorage.setItem("token", response.data.token);
       if (onAuthChange) onAuthChange();
       navigate("/");
     } catch (err) {
-      // ✅ Better error handling from Axios
-      setError(err.response?.data?.error || "Network error. Please try again.");
+      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ... (keep your entire return and styles section exactly as it was)
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Shop Login</h2>
       <form onSubmit={handleLogin}>
-        {/* Input fields remain the same */}
         <div style={styles.inputGroup}>
             <label htmlFor="email" style={styles.label}>Email</label>
             <input id="email" name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required style={styles.input} />
@@ -62,6 +57,7 @@ function Login({ onAuthChange }) {
     </div>
   );
 }
+
 
 // --- Styles ---
 const styles = {
@@ -126,3 +122,4 @@ const styles = {
 
 
 export default Login;
+
